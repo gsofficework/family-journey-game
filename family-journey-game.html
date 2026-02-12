@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Our Family Journey - The Adventure!</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            background: #5c94fc;
+            touch-action: none;
+        }
+
+        #game-canvas {
+            display: block;
+            background: #5c94fc;
+        }
+
+        /* HUD */
+        #hud {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.7) 100%);
+            color: white;
+            padding: 15px 20px;
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            font-size: 18px;
+            font-weight: bold;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+
+        @media (max-width: 480px) {
+            #hud {
+                padding: 10px 15px;
+                font-size: 16px;
+            }
+        }
+
+        /* Mobile Controls */
+        .mobile-controls {
+            position: fixed;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 1500;
+            pointer-events: none;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 15px;
+            pointer-events: auto;
+        }
+
+        .control-btn {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #FFD700, #FFA500);
+            border: 4px solid white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.1s;
+            touch-action: manipulation;
+        }
+
+        .control-btn:active {
+            transform: scale(0.9);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .control-btn {
+                width: 65px;
+                height: 65px;
+                font-size: 28px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .control-btn {
+                width: 60px;
+                height: 60px;
+                font-size: 26px;
+            }
+            .mobile-controls {
+                padding: 0 10px;
+            }
+            .control-group {
+                gap: 10px;
+            }
+        }
+
+        /* Title Screen */
+        #title-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 200% 200%;
+            animation: gradientShift 8s ease infinite;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        #title-screen::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(255,215,0,0.1) 0%, transparent 50%);
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        #title-screen h1 {
+            font-size: clamp(36px, 9vw, 72px);
+            margin-bottom: 30px;
+            text-shadow: 
+                0 0 10px rgba(255,255,255,0.5),
+                0 0 20px rgba(255,215,0,0.5),
+                4px 4px 0px rgba(0,0,0,0.3),
+                8px 8px 20px rgba(0,0,0,0.5);
+            animation: titleFloat 3s ease-in-out infinite;
+            position: relative;
+            z-index: 1;
+            letter-spacing: 2px;
+            font-weight: 900;
+        }
+
+        @keyframes titleFloat {
+            0%, 100% { 
+                transform: translateY(0) scale(1);
+                text-shadow: 
+                    0 0 10px rgba(255,255,255,0.5),
+                    0 0 20px rgba(255,215,0,0.5),
+                    4px 4px 0px rgba(0,0,0,0.3),
+                    8px 8px 20px rgba(0,0,0,0.5);
+            }
+            50% { 
+                transform: translateY(-20px) scale(1.02);
+                text-shadow: 
+                    0 0 15px rgba(255,255,255,0.7),
+                    0 0 30px rgba(255,215,0,0.7),
+                    4px 4px 0px rgba(0,0,0,0.3),
+                    8px 8px 25px rgba(0,0,0,0.6);
+            }
+        }
+
+        #title-screen .subtitle {
+            font-size: clamp(16px, 3.5vw, 24px);
+            margin: 20px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            position: relative;
+            z-index: 1;
+            line-height: 1.8;
+            animation: fadeInUp 1s ease-out 0.5s both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF6B6B 100%);
+            background-size: 200% 200%;
+            animation: buttonGradient 3s ease infinite;
+            color: #333;
+            border: 4px solid white;
+            padding: 22px 60px;
+            font-size: clamp(22px, 4.5vw, 36px);
+            font-weight: 900;
+            cursor: pointer;
+            border-radius: 50px;
+            box-shadow: 
+                0 0 20px rgba(255,215,0,0.6),
+                0 10px 40px rgba(0,0,0,0.4),
+                inset 0 2px 10px rgba(255,255,255,0.3);
+            transition: all 0.3s;
+            margin-top: 40px;
+            position: relative;
+            z-index: 1;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            animation: buttonGradient 3s ease infinite, buttonPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes buttonGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes buttonPulse {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 
+                    0 0 20px rgba(255,215,0,0.6),
+                    0 10px 40px rgba(0,0,0,0.4),
+                    inset 0 2px 10px rgba(255,255,255,0.3);
+            }
+            50% { 
+                transform: scale(1.05);
+                box-shadow: 
+                    0 0 30px rgba(255,215,0,0.8),
+                    0 15px 50px rgba(0,0,0,0.5),
+                    inset 0 2px 10px rgba(255,255,255,0.4);
+            }
+        }
+
+        .start-btn:hover {
+            transform: scale(1.1) !important;
+            box-shadow: 
+                0 0 40px rgba(255,215,0,1),
+                0 20px 60px rgba(0,0,0,0.6),
+                inset 0 2px 15px rgba(255,255,255,0.5);
+        }
+
+        .start-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Floating stars animation */
+        .floating-stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .star-particle {
+            position: absolute;
+            font-size: 20px;
+            opacity: 0;
+            animation: floatStar 4s ease-in-out infinite;
+        }
+
+        @keyframes floatStar {
+            0% {
+                opacity: 0;
+                transform: translateY(100vh) rotate(0deg) scale(0);
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-100px) rotate(360deg) scale(1);
+            }
+        }
+
+        /* Photo Display */
+        #photo-display {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.75);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .photo-frame {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            max-width: 85vw;
+            max-height: 80vh;
+            text-align: center;
+            box-shadow: 0 0 40px rgba(255,215,0,0.6), 0 15px 50px rgba(0,0,0,0.7);
+            border: 4px solid #FFD700;
+            animation: photoZoom 0.5s;
+            position: relative;
+        }
+
+        @keyframes photoZoom {
+            0% { transform: scale(0) rotate(-10deg); }
+            50% { transform: scale(1.1) rotate(5deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        .photo-frame h2 {
+            color: #FF6B9D;
+            font-size: clamp(20px, 4vw, 32px);
+            margin-bottom: 10px;
+        }
+
+        .photo-frame .tagline {
+            font-size: clamp(12px, 2.5vw, 18px);
+            color: #666;
+            font-style: italic;
+            margin: 10px 0;
+        }
+
+        .photo-frame img {
+            max-width: 100%;
+            max-height: 60vh;
+            border-radius: 15px;
+            margin: 10px 0;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .close-photo {
+            margin-top: 15px;
+            padding: 10px 25px;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            border: 2px solid white;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+            color: #333;
+            transition: all 0.2s;
+        }
+
+        .close-photo:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(255,215,0,0.5);
+        }
+
+        /* Game Complete */
+        #game-complete {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: 5000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        #game-complete h1 {
+            font-size: clamp(40px, 10vw, 80px);
+            margin-bottom: 20px;
+            text-shadow: 4px 4px 0px #000;
+            animation: celebrate 1s ease-in-out infinite;
+        }
+
+        @keyframes celebrate {
+            0%, 100% { transform: scale(1) rotate(-2deg); }
+            50% { transform: scale(1.05) rotate(2deg); }
+        }
+
+        .subtitle {
+            font-size: clamp(14px, 3vw, 20px);
+            margin: 15px 0;
+            max-width: 600px;
+            line-height: 1.6;
+        }
+
+        /* Finish Line */
+        #finish-line-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 4000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: white;
+            text-align: center;
+            animation: fadeIn 0.5s;
+        }
+
+        #finish-line-overlay h1 {
+            font-size: clamp(40px, 8vw, 72px);
+            margin-bottom: 20px;
+            text-shadow: 4px 4px 0px #000;
+            animation: celebrate 1s ease-in-out infinite;
+        }
+
+        #finish-line-overlay p {
+            font-size: clamp(20px, 4vw, 32px);
+            margin: 15px 0;
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Title Screen -->
+    <div id="title-screen">
+        <div class="floating-stars" id="floating-stars"></div>
+        <h1>🌟 OUR FAMILY JOURNEY 🌟</h1>
+        <p class="subtitle">
+            Jump and collect ⭐ photo stars!<br>
+            <span class="desktop-controls">SPACE/↑ to jump • ← → arrows to move</span>
+            <span class="mobile-controls-text">Use touch buttons to move and jump</span><br>
+            Collect all 11 memories!
+        </p>
+        <button class="start-btn" onclick="startGame()">🎮 START ADVENTURE</button>
+
+        <style>
+            .desktop-controls { display: inline; }
+            .mobile-controls-text { display: none; }
+            @media (max-width: 768px) {
+                .desktop-controls { display: none; }
+                .mobile-controls-text { display: inline; }
+            }
+        </style>
+    </div>
+
+    <!-- HUD -->
+    <div id="hud">
+        <div style="display: flex; gap: 20px;">
+            <span>⭐ <span id="memory-count">0</span>/11</span>
+            <span><span id="distance">0</span>m</span>
+        </div>
+    </div>
+
+    <!-- Game Canvas -->
+    <canvas id="game-canvas"></canvas>
+
+    <!-- Mobile Controls -->
+    <div class="mobile-controls">
+        <!-- Left side: Movement controls -->
+        <div class="control-group">
+            <div class="control-btn" ontouchstart="handleLeft(event)" ontouchend="handleLeftEnd(event)">⬅️</div>
+            <div class="control-btn" ontouchstart="handleRight(event)" ontouchend="handleRightEnd(event)">➡️</div>
+        </div>
+        <!-- Right side: Jump control -->
+        <div class="control-group">
+            <div class="control-btn" ontouchstart="handleJump(event)" ontouchend="handleJumpEnd(event)">⬆️</div>
+        </div>
+    </div>
+
+    <!-- Photo Display -->
+    <div id="photo-display">
+        <div class="photo-frame">
+            <h2 id="photo-title"></h2>
+            <p class="tagline" id="photo-tagline"></p>
+            <img id="photo-img" src="" alt="" />
+            <button class="close-photo" onclick="closePhoto()">
+                Continue ➡️
+            </button>
+        </div>
+    </div>
+
+    <!-- Finish Line Overlay -->
+    <div id="finish-line-overlay">
+        <h1>🏁 FINISH LINE! 🏁</h1>
+        <p>All Memories Collected!</p>
+        <p style="font-size: clamp(16px, 3vw, 24px);">Restarting game...</p>
+    </div>
+
+    <!-- Game Complete -->
+    <div id="game-complete">
+        <h1>🎉 ALL MEMORIES COLLECTED! 🎉</h1>
+        <p style="font-size: clamp(18px, 4vw, 28px); margin: 20px 0;">11/11 Photo Stars Collected!</p>
+        <p style="font-size: clamp(16px, 3vw, 24px); margin: 20px 0;">From Two Hearts to Three... Forever! 💕</p>
+        <button class="start-btn" onclick="location.reload()">PLAY AGAIN</button>
+    </div>
+
+    <!-- Audio Elements -->
+    <audio id="bg-music" loop preload="auto">
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="jump-sound">
+        <source src="data:audio/wav;base64,UklGRhQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=" type="audio/wav">
+    </audio>
+    <audio id="star-sound">
+        <source src="data:audio/wav;base64,UklGRhQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=" type="audio/wav">
+    </audio>
+
+    <script>
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let gameRunning = false;
+        let gameSpeed = 4;
+        let collectedCount = 0;
+        let photoJustOpened = false;
+        let keysReleasedAfterPhoto = false;
+
+        // Audio elements
+        const bgMusic = document.getElementById('bg-music');
+        const jumpSound = document.getElementById('jump-sound');
+        const starSound = document.getElementById('star-sound');
+
+        // Simple beep sound generator
+        function playJumpSound() {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            oscillator.frequency.value = 523; // C5 note
+            oscillator.type = 'square';
+
+            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+
+            oscillator.start(audioCtx.currentTime);
+            oscillator.stop(audioCtx.currentTime + 0.1);
+        }
+
+        function playStarSound() {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            oscillator.type = 'sine';
+            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+
+            // Play ascending notes (like Mario star)
+            [659, 784, 988, 1319].forEach((freq, i) => {
+                oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime + i * 0.08);
+            });
+
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+
+            oscillator.start(audioCtx.currentTime);
+            oscillator.stop(audioCtx.currentTime + 0.4);
+        }
+
+        function playBackgroundMusic() {
+            // Use HTML5 audio element for continuous looping music
+            bgMusic.volume = 0.3; // Set volume to 30%
+            if (bgMusic.paused) {
+                bgMusic.play().catch(error => {
+                    // Handle autoplay restrictions - music will start on user interaction
+                    console.log('Background music will start after user interaction');
+                });
+            }
+        }
+
+        // Ensure music keeps playing - check periodically
+        function ensureMusicPlaying() {
+            if (!bgMusic.paused && bgMusic.ended) {
+                // If music ended (shouldn't happen with loop, but just in case)
+                bgMusic.currentTime = 0;
+                bgMusic.play().catch(() => {});
+            }
+        }
+
+        function stopBackgroundMusic() {
+            bgMusic.pause();
+            bgMusic.currentTime = 0;
+        }
+
+        const game = {
+            scrollOffset: 0,
+            gravity: 0.8,
+            keys: { space: false, left: false, right: false }
+        };
+
+        const memoryData = [
+            { icon: '📸', title: 'Memory 1', tagline: '"The Beginning of Our Story"', photo: 'photos/1.jpeg' },
+            { icon: '📸', title: 'Memory 2', tagline: '"Building Our Dreams Together"', photo: 'photos/2.jpeg' },
+            { icon: '👶', title: 'Memory 3', tagline: '"A New Life, A New Joy"', photo: 'photos/3.jpeg', babyJoins: true },
+            { icon: '📸', title: 'Memory 4', tagline: '"Growing Together, Day by Day"', photo: 'photos/4.jpeg' },
+            { icon: '📸', title: 'Memory 5', tagline: '"Cherished Moments"', photo: 'photos/5.jpeg' },
+            { icon: '📸', title: 'Memory 7', tagline: '"Celebrating Life\'s Blessings"', photo: 'photos/7.jpeg' },
+            { icon: '📸', title: 'Memory 8', tagline: '"Love, Laughter & Togetherness"', photo: 'photos/8.jpeg' },
+            { icon: '📸', title: 'Memory 9', tagline: '"Creating Beautiful Memories"', photo: 'photos/9.jpeg' },
+            { icon: '📸', title: 'Memory 11', tagline: '"Every Moment is Precious"', photo: 'photos/11.jpeg' },
+            { icon: '🎂', title: 'Memory 12', tagline: '"Celebrating Vedika\'s First Birthday!"', photo: 'photos/12.jpeg' },
+            { icon: '🎨', title: 'Memory 14', tagline: '"Our Legacy of Love"', photo: 'photos/14.jpeg' }
+        ];
+
+        class FamilyMember {
+            constructor(emoji, offsetX) {
+                this.emoji = emoji;
+                this.offsetX = offsetX;
+                this.y = 0;
+                this.velocityY = 0;
+                this.jumping = false;
+            }
+
+            draw(baseX, baseY) {
+                const walkBob = Math.sin(Date.now() / 100 + this.offsetX) * 3;
+                const x = baseX + this.offsetX;
+                const y = baseY + this.y + walkBob;
+
+                // Draw emoji with shadow and outline for fun cartoon effect
+                ctx.save();
+
+                // Shadow
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+                ctx.shadowBlur = 8;
+                ctx.shadowOffsetX = 3;
+                ctx.shadowOffsetY = 3;
+
+                // Draw larger emoji
+                ctx.font = '70px Arial';
+                ctx.fillText(this.emoji, x, y + 60);
+
+                ctx.restore();
+            }
+
+            update() {
+                if (this.jumping) {
+                    this.velocityY += game.gravity;
+                    this.y += this.velocityY;
+                    if (this.y >= 0) {
+                        this.y = 0;
+                        this.velocityY = 0;
+                        this.jumping = false;
+                    }
+                }
+            }
+
+            jump() {
+                if (!this.jumping) {
+                    this.velocityY = -35;
+                    this.jumping = true;
+                    playJumpSound();
+                }
+            }
+        }
+
+        class Family {
+            constructor() {
+                this.x = 150;
+                this.y = canvas.height - 200;
+                this.members = [
+                    new FamilyMember('👨', 0),
+                    new FamilyMember('🤰', -80)
+                ];
+                this.babyAdded = false;
+            }
+
+            addBaby() {
+                if (!this.babyAdded) {
+                    this.members[1].emoji = '👩';
+                    this.members.push(new FamilyMember('👶', 80));
+                    this.babyAdded = true;
+                }
+            }
+
+            draw() {
+                this.members.forEach(m => m.draw(this.x, this.y));
+            }
+
+            update() {
+                this.members.forEach(m => m.update());
+            }
+
+            jump() {
+                this.members.forEach(m => m.jump());
+            }
+
+            getBounds() {
+                return {
+                    x: this.x - 60,
+                    y: this.y,
+                    w: 200,
+                    h: 80
+                };
+            }
+        }
+
+        class PhotoStar {
+            constructor(x, y, data, index) {
+                this.x = x;
+                this.y = y;
+                this.data = data;
+                this.index = index;
+                this.collected = false;
+                this.baseY = y;
+                this.size = 70;
+            }
+
+            draw() {
+                if (!this.collected) {
+                    // Floating animation
+                    this.y = this.baseY + Math.sin(Date.now() / 300) * 20;
+
+                    // Glow
+                    ctx.shadowBlur = 25;
+                    ctx.shadowColor = '#FFD700';
+
+                    // Star
+                    ctx.font = `${this.size}px Arial`;
+                    ctx.fillText('⭐', this.x - game.scrollOffset, this.y);
+
+                    // Icon overlay
+                    ctx.font = '35px Arial';
+                    ctx.fillText(this.data.icon, this.x - game.scrollOffset + 17, this.y - 5);
+
+                    ctx.shadowBlur = 0;
+
+                    // Sparkles
+                    if (Math.random() > 0.7) {
+                        ctx.font = '25px Arial';
+                        const sparkX = this.x - game.scrollOffset + (Math.random() - 0.5) * 60;
+                        const sparkY = this.y + (Math.random() - 0.5) * 60;
+                        ctx.globalAlpha = Math.random();
+                        ctx.fillText(['✨', '💫', '🌟'][Math.floor(Math.random() * 3)], sparkX, sparkY);
+                        ctx.globalAlpha = 1;
+                    }
+                }
+            }
+
+            isDirectlyBelow(family) {
+                if (this.collected) return false;
+
+                const screenX = this.x - game.scrollOffset;
+                const fb = family.getBounds();
+                const centerX = fb.x + fb.w / 2;
+
+                // Check if player is directly below the star (within 40 pixels horizontally)
+                const horizontalTolerance = 40;
+                return Math.abs(screenX - centerX) < horizontalTolerance && 
+                       this.y < fb.y; // Star is above the family
+            }
+
+            checkCollision(family) {
+                if (this.collected) return false;
+
+                const screenX = this.x - game.scrollOffset;
+                const fb = family.getBounds();
+
+                // Only collect when jumping and close to star
+                const horizontalPadding = 60;
+                const verticalRange = 80; // Must be close vertically (jumping)
+
+                // Check if any family member is jumping
+                const isJumping = family.members.some(m => m.jumping);
+
+                if (screenX > fb.x - horizontalPadding && screenX < fb.x + fb.w + horizontalPadding &&
+                    this.y > fb.y - verticalRange && this.y < fb.y + 40 && isJumping) {
+                    this.collect();
+                    return true;
+                }
+                return false;
+            }
+
+            collect() {
+                this.collected = true;
+                collectedCount++;
+                document.getElementById('memory-count').textContent = collectedCount;
+
+                // Play star collection sound
+                playStarSound();
+
+                // Collection animation
+                this.animateCollection();
+
+                // Pause game and show photo (but keep music playing)
+                setTimeout(() => {
+                    gameRunning = false;
+                    this.showPhoto();
+                    // Ensure music continues playing even when game is paused
+                    ensureMusicPlaying();
+                }, 300);
+
+                // Add baby after birth photo
+                if (this.data.babyJoins) {
+                    setTimeout(() => family.addBaby(), 1000);
+                }
+
+                // Note: Finish line will be shown after last photo is closed (handled in closePhoto)
+            }
+
+            animateCollection() {
+                const screenX = this.x - game.scrollOffset;
+
+                // Create particles
+                for (let i = 0; i < 15; i++) {
+                    const particle = document.createElement('div');
+                    particle.style.position = 'fixed';
+                    particle.style.left = screenX + 'px';
+                    particle.style.top = this.y + 'px';
+                    particle.style.fontSize = '30px';
+                    particle.style.pointerEvents = 'none';
+                    particle.style.zIndex = '4000';
+                    particle.textContent = ['✨', '⭐', '💫'][Math.floor(Math.random() * 3)];
+
+                    const angle = (Math.PI * 2 * i) / 15;
+                    const velocity = 5;
+                    const vx = Math.cos(angle) * velocity;
+                    const vy = Math.sin(angle) * velocity;
+
+                    document.body.appendChild(particle);
+
+                    let px = screenX, py = this.y, life = 60;
+                    const animate = () => {
+                        px += vx;
+                        py += vy;
+                        life--;
+                        particle.style.left = px + 'px';
+                        particle.style.top = py + 'px';
+                        particle.style.opacity = life / 60;
+
+                        if (life > 0) requestAnimationFrame(animate);
+                        else particle.remove();
+                    };
+                    animate();
+                }
+            }
+
+            showPhoto() {
+                document.getElementById('photo-title').textContent = this.data.icon + ' ' + this.data.title;
+                document.getElementById('photo-tagline').textContent = this.data.tagline;
+                document.getElementById('photo-img').src = this.data.photo;
+                document.getElementById('photo-display').style.display = 'flex';
+
+                // Set flags to prevent immediate closing
+                photoJustOpened = true;
+                keysReleasedAfterPhoto = false;
+
+                // Clear all key states to prevent held keys from closing photo
+                game.keys.space = false;
+                game.keys.left = false;
+                game.keys.right = false;
+            }
+        }
+
+        let family, platforms, photoStars;
+        let finishLineX = null;
+        let finishLineReached = false;
+
+        // Load background image
+        const backgroundImage = new Image();
+        backgroundImage.src = 'photos/background.jpeg';
+        let backgroundLoaded = false;
+        backgroundImage.onload = () => {
+            backgroundLoaded = true;
+        };
+
+        // Find the next uncollected star ahead of current position
+        function getNextUncollectedStar() {
+            const currentPos = game.scrollOffset + family.x;
+            return photoStars.find(star => !star.collected && star.x > currentPos - 100);
+        }
+
+        // Check if we can move forward (no uncollected star blocking)
+        function canMoveForward() {
+            const nextStar = getNextUncollectedStar();
+            if (!nextStar) return true; // No stars ahead, can move freely
+
+            const currentPos = game.scrollOffset + family.x;
+            const distanceToStar = nextStar.x - currentPos;
+
+            // Block only if we're very close to an uncollected star (within 50 pixels)
+            // This allows them to get close enough to jump and collect it
+            return distanceToStar > 50 || nextStar.collected;
+        }
+
+        function initGame() {
+            family = new Family();
+            platforms = [];
+            photoStars = [];
+
+            const baseY = canvas.height - 150;
+            platforms.push({ x: 0, y: baseY, w: 50000, h: 150 });
+
+            // Create floating platforms
+            for (let i = 0; i < 80; i++) {
+                const x = 400 + i * 500;
+                const y = baseY - 100 - Math.random() * 80;
+                platforms.push({ x, y, w: 180, h: 15 });
+            }
+
+            // Create photo stars (positioned right above characters for easy visibility)
+            memoryData.forEach((data, i) => {
+                const x = 1000 + i * 1200;
+                const y = baseY - 120; // Fixed height, right above the family
+                photoStars.push(new PhotoStar(x, y, data, i));
+            });
+
+            // Set finish line position after the last star
+            if (photoStars.length > 0) {
+                const lastStar = photoStars[photoStars.length - 1];
+                finishLineX = lastStar.x + 600; // 600 pixels after the last star
+            }
+            finishLineReached = false;
+        }
+
+        function drawBackground() {
+            if (backgroundLoaded) {
+                // Draw the cartoon family background
+                // Make it visible but not too prominent
+                ctx.globalAlpha = 0.45; // Increased visibility (45% opacity)
+
+                // Calculate scaling to fit screen height while maintaining aspect ratio
+                const bgScale = canvas.height / backgroundImage.height;
+                const scaledWidth = backgroundImage.width * bgScale;
+                const scaledHeight = canvas.height;
+
+                // Draw background centered
+                const bgX = (canvas.width - scaledWidth) / 2;
+                ctx.drawImage(backgroundImage, bgX, 0, scaledWidth, scaledHeight);
+
+                ctx.globalAlpha = 1.0; // Reset transparency
+
+                // Add a lighter sky gradient overlay so background is more visible
+                const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+                grad.addColorStop(0, 'rgba(92, 148, 252, 0.15)');
+                grad.addColorStop(1, 'rgba(135, 206, 235, 0.15)');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            } else {
+                // Fallback gradient while image loads
+                const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+                grad.addColorStop(0, '#5c94fc');
+                grad.addColorStop(1, '#87CEEB');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+
+            // Sun for ambiance
+            ctx.fillStyle = 'rgba(255,220,100,0.4)';
+            ctx.beginPath();
+            ctx.arc(80, 80, 50, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function drawPlatforms() {
+            platforms.forEach(p => {
+                ctx.fillStyle = '#90EE90';
+                ctx.fillRect(p.x - game.scrollOffset, p.y - 8, p.w, 8);
+                ctx.fillStyle = '#8B4513';
+                ctx.fillRect(p.x - game.scrollOffset, p.y, p.w, p.h);
+            });
+        }
+
+        function drawFinishLine() {
+            if (!finishLineX) return;
+
+            const screenX = finishLineX - game.scrollOffset;
+            const baseY = canvas.height - 150;
+
+            // Only draw finish line if all stars are collected AND photo is not displayed
+            const allCollected = photoStars.every(star => star.collected);
+            const photoDisplayed = document.getElementById('photo-display').style.display === 'flex';
+            if (!allCollected || photoDisplayed) return;
+
+            // Draw checkered flag pattern
+            const flagHeight = 100;
+            const stripeWidth = 20;
+            const numStripes = 5;
+
+            // Draw flag pole
+            ctx.fillStyle = '#8B4513';
+            ctx.fillRect(screenX - 5, baseY - flagHeight, 10, flagHeight + 20);
+
+            // Draw checkered flag
+            for (let i = 0; i < numStripes; i++) {
+                const y = baseY - flagHeight + (i * stripeWidth);
+                ctx.fillStyle = i % 2 === 0 ? '#000000' : '#FFFFFF';
+                ctx.fillRect(screenX + 5, y, 80, stripeWidth);
+            }
+
+            // Draw "FINISH" text
+            ctx.fillStyle = '#FFD700';
+            ctx.font = 'bold 48px Arial';
+            ctx.textAlign = 'center';
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 3;
+            ctx.strokeText('🏁 FINISH 🏁', screenX + 45, baseY - flagHeight - 20);
+            ctx.fillText('🏁 FINISH 🏁', screenX + 45, baseY - flagHeight - 20);
+            ctx.textAlign = 'left';
+        }
+
+
+        function gameLoop() {
+            if (!gameRunning) return;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawBackground();
+            drawPlatforms();
+            drawFinishLine();
+
+            // Manual scroll with arrow keys - but blocked by uncollected stars!
+            if (game.keys.right) {
+                if (canMoveForward()) {
+                    game.scrollOffset += gameSpeed;
+                } else {
+                    // Show visual feedback when blocked
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    
+                    // Draw text with shadow for better visibility
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    
+                    // Calculate font size to ensure text fits on screen
+                    const text = '⭐ COLLECT THE STAR FIRST! ⭐';
+                    const maxWidth = canvas.width * 0.9; // Use 90% of screen width
+                    let fontSize = Math.min(48, Math.max(24, canvas.width / 12));
+                    
+                    // Measure text and adjust font size if needed
+                    ctx.font = `bold ${fontSize}px Arial`;
+                    let textWidth = ctx.measureText(text).width;
+                    
+                    // Reduce font size until text fits
+                    while (textWidth > maxWidth && fontSize > 20) {
+                        fontSize -= 2;
+                        ctx.font = `bold ${fontSize}px Arial`;
+                        textWidth = ctx.measureText(text).width;
+                    }
+                    
+                    // Draw shadow/outline
+                    ctx.strokeStyle = '#000000';
+                    ctx.lineWidth = Math.max(4, fontSize / 8);
+                    ctx.strokeText(text, canvas.width / 2, canvas.height / 2);
+                    
+                    // Draw main text
+                    ctx.fillStyle = '#FFD700';
+                    ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+                    
+                    // Reset text alignment
+                    ctx.textAlign = 'left';
+                    ctx.textBaseline = 'alphabetic';
+                }
+            }
+            if (game.keys.left && game.scrollOffset > 0) {
+                game.scrollOffset -= gameSpeed;
+            }
+            document.getElementById('distance').textContent = Math.floor(game.scrollOffset / 10);
+
+            // Draw photo stars
+            photoStars.forEach(star => {
+                star.draw();
+                star.checkCollision(family);
+            });
+
+            // Update and draw family
+            family.update();
+            family.draw();
+
+            // Ensure background music keeps playing
+            ensureMusicPlaying();
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function showFinishLine() {
+            // Show finish line overlay
+            document.getElementById('finish-line-overlay').style.display = 'flex';
+            gameRunning = false;
+            
+            // Stop background music before restart
+            stopBackgroundMusic();
+
+            // Restart game after 3 seconds
+            setTimeout(() => {
+                location.reload();
+            }, 3000);
+        }
+
+        // Create floating stars animation
+        function createFloatingStars() {
+            const starsContainer = document.getElementById('floating-stars');
+            if (!starsContainer) return;
+            
+            const stars = ['⭐', '✨', '💫', '🌟'];
+            const numStars = 15;
+            
+            for (let i = 0; i < numStars; i++) {
+                const star = document.createElement('div');
+                star.className = 'star-particle';
+                star.textContent = stars[Math.floor(Math.random() * stars.length)];
+                star.style.left = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 4 + 's';
+                star.style.animationDuration = (3 + Math.random() * 3) + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+
+        function startGame() {
+            document.getElementById('title-screen').style.display = 'none';
+            document.getElementById('finish-line-overlay').style.display = 'none';
+            document.getElementById('hud').style.display = 'flex';
+            gameRunning = true;
+            playBackgroundMusic();
+            initGame();
+            gameLoop();
+        }
+
+        // Initialize floating stars when page loads
+        window.addEventListener('DOMContentLoaded', createFloatingStars);
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', createFloatingStars);
+        } else {
+            createFloatingStars();
+        }
+
+        function closePhoto() {
+            document.getElementById('photo-display').style.display = 'none';
+            photoJustOpened = false;
+            keysReleasedAfterPhoto = false;
+
+            // Clear all key states before resuming
+            game.keys.space = false;
+            game.keys.left = false;
+            game.keys.right = false;
+
+            // Check if all photos collected - show finish line after closing last photo
+            if (collectedCount === 11) {
+                // Small delay to ensure photo is fully closed before showing finish line
+                setTimeout(() => {
+                    showFinishLine();
+                }, 300);
+                return; // Don't resume game if showing finish line
+            }
+
+            // Ensure music is still playing
+            ensureMusicPlaying();
+
+            gameRunning = true;
+            gameLoop();
+        }
+
+        function isPhotoDisplayed() {
+            return document.getElementById('photo-display').style.display === 'flex';
+        }
+
+        function handleJump(e) {
+            e.preventDefault();
+            game.keys.space = true;
+            if (gameRunning) family.jump();
+        }
+
+        function handleJumpEnd(e) {
+            e.preventDefault();
+            game.keys.space = false;
+        }
+
+        function handleLeft(e) {
+            e.preventDefault();
+            game.keys.left = true;
+        }
+
+        function handleLeftEnd(e) {
+            e.preventDefault();
+            game.keys.left = false;
+        }
+
+        function handleRight(e) {
+            e.preventDefault();
+            game.keys.right = true;
+        }
+
+        function handleRightEnd(e) {
+            e.preventDefault();
+            game.keys.right = false;
+        }
+
+        // Keyboard
+        window.addEventListener('keydown', e => {
+            // Handle photo display - MUST release keys first, then press to close
+            if (isPhotoDisplayed()) {
+                if (keysReleasedAfterPhoto && (e.code === 'Space' || e.code === 'Enter' || e.code === 'ArrowRight')) {
+                    e.preventDefault();
+                    closePhoto();
+                }
+                // Don't process any game keys when photo is showing
+                return;
+            }
+
+            if (e.code === 'Space' || e.code === 'ArrowUp') {
+                e.preventDefault();
+                if (!game.keys.space) {
+                    game.keys.space = true;
+                    if (gameRunning) family.jump();
+                }
+            }
+            if (e.code === 'ArrowLeft') {
+                e.preventDefault();
+                game.keys.left = true;
+            }
+            if (e.code === 'ArrowRight') {
+                e.preventDefault();
+                game.keys.right = true;
+            }
+        });
+
+        window.addEventListener('keyup', e => {
+            // When photo is displayed and user releases a key, mark as ready to close
+            if (isPhotoDisplayed()) {
+                keysReleasedAfterPhoto = true;
+                return;
+            }
+
+            if (e.code === 'Space' || e.code === 'ArrowUp') {
+                game.keys.space = false;
+            }
+            if (e.code === 'ArrowLeft') {
+                game.keys.left = false;
+            }
+            if (e.code === 'ArrowRight') {
+                game.keys.right = false;
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            if (family) {
+                family.y = canvas.height - 200;
+            }
+        });
+
+        // Handle orientation changes on mobile
+        window.addEventListener('orientationchange', () => {
+            setTimeout(() => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                if (family) {
+                    family.y = canvas.height - 200;
+                }
+            }, 100);
+        });
+    </script>
+</body>
+</html>
