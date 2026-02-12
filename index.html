@@ -774,8 +774,8 @@
 
         const game = {
             scrollOffset: 0,
-            gravity: isMobile ? 0.65 : 0.8,           // Slightly floatier on mobile for easier star collection
-            jumpPower: isMobile ? -42 : -35,         // Stronger jump on mobile so emojis reach stars faster
+            gravity: 1.0,                             // Snappy gravity — short jump, quick landing
+            jumpPower: isMobile ? -16 : -14,          // Short jump: just high enough to reach the star
             keys: { space: false, left: false, right: false }
         };
 
