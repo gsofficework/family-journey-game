@@ -630,7 +630,9 @@
         canvas.height = window.innerHeight;
 
         let gameRunning = false;
-        let gameSpeed = 4;
+        // Faster on mobile so the game doesn't feel slow (touch screens benefit from quicker scroll)
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+        let gameSpeed = isMobile ? 7 : 5;
         let collectedCount = 0;
         let photoJustOpened = false;
         let keysReleasedAfterPhoto = false;
@@ -959,19 +961,33 @@
             }
 
             showPhoto() {
-                document.getElementById('photo-title').textContent = this.data.icon + ' ' + this.data.title;
-                document.getElementById('photo-tagline').textContent = this.data.tagline;
-                document.getElementById('photo-img').src = this.data.photo;
-                document.getElementById('photo-display').style.display = 'flex';
+                const photoDisplay = document.getElementById('photo-display');
+                const photoImg = document.getElementById('photo-img');
+                const photoTitle = document.getElementById('photo-title');
+                const photoTagline = document.getElementById('photo-tagline');
 
-                // Set flags to prevent immediate closing
-                photoJustOpened = true;
-                keysReleasedAfterPhoto = false;
+                photoDisplay.style.display = 'none'; // Keep hidden until photo is loaded
+                photoTitle.textContent = this.data.icon + ' ' + this.data.title;
+                photoTagline.textContent = this.data.tagline;
+                photoImg.src = ''; // Clear previous photo so we don't show old image
 
-                // Clear all key states to prevent held keys from closing photo
-                game.keys.space = false;
-                game.keys.left = false;
-                game.keys.right = false;
+                const revealPhoto = () => {
+                    photoDisplay.style.display = 'flex';
+                    photoJustOpened = true;
+                    keysReleasedAfterPhoto = false;
+                    game.keys.space = false;
+                    game.keys.left = false;
+                    game.keys.right = false;
+                };
+
+                photoImg.onload = () => revealPhoto();
+                photoImg.onerror = () => revealPhoto(); // Show anyway if image fails to load
+                photoImg.src = this.data.photo;
+
+                // If image is already cached, onload may not fire
+                if (photoImg.complete) {
+                    revealPhoto();
+                }
             }
         }
 
