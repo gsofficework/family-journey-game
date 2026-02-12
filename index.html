@@ -1108,7 +1108,7 @@
 
             // Create photo stars (positioned right above characters for easy visibility)
             memoryData.forEach((data, i) => {
-                const x = 1000 + i * 1200;
+                const x = 600 + i * 750; // Closer spacing (750px between stars) for a shorter game
                 const y = baseY - 120; // Fixed height, right above the family
                 photoStars.push(new PhotoStar(x, y, data, i));
             });
