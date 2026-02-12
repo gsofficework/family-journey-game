@@ -157,48 +157,123 @@
             50% { opacity: 1; }
         }
 
-        #title-screen h1 {
-            font-size: clamp(36px, 9vw, 72px);
-            margin-bottom: 30px;
-            text-shadow: 
-                0 0 10px rgba(255,255,255,0.5),
-                0 0 20px rgba(255,215,0,0.5),
-                4px 4px 0px rgba(0,0,0,0.3),
-                8px 8px 20px rgba(0,0,0,0.5);
-            animation: titleFloat 3s ease-in-out infinite;
+        /* Game poster layout */
+        .poster-content {
             position: relative;
             z-index: 1;
-            letter-spacing: 2px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            max-width: 90vw;
+            width: 100%;
+        }
+
+        .poster-tagline {
+            font-size: clamp(16px, 3vw, 24px);
+            letter-spacing: 3px;
+            text-transform: none;
+            margin: 0 0 28px 0;
+            padding: 0 15px;
+            opacity: 1;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            animation: fadeInUp 0.8s ease-out both;
+            font-weight: 600;
+            line-height: 1.6;
+            text-align: center;
+        }
+
+        .poster-tagline .tagline-line {
+            display: block;
+        }
+
+        .poster-tagline .tagline-line:first-child {
+            margin-bottom: 6px;
+        }
+
+        .poster-title {
+            margin: 0 0 32px 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+            line-height: 1.1;
+        }
+
+        .poster-title .title-line {
+            display: block;
+            font-size: clamp(38px, 10vw, 80px);
             font-weight: 900;
+            letter-spacing: 4px;
+            text-shadow: 
+                0 0 12px rgba(255,255,255,0.6),
+                0 0 24px rgba(255,215,0,0.5),
+                3px 3px 0 rgba(0,0,0,0.35),
+                6px 6px 20px rgba(0,0,0,0.5);
+            animation: titleFloat 3s ease-in-out infinite;
+            text-align: center;
+        }
+
+        .poster-title .title-line:last-child {
+            animation-delay: 0.1s;
         }
 
         @keyframes titleFloat {
             0%, 100% { 
                 transform: translateY(0) scale(1);
                 text-shadow: 
-                    0 0 10px rgba(255,255,255,0.5),
-                    0 0 20px rgba(255,215,0,0.5),
-                    4px 4px 0px rgba(0,0,0,0.3),
-                    8px 8px 20px rgba(0,0,0,0.5);
+                    0 0 12px rgba(255,255,255,0.6),
+                    0 0 24px rgba(255,215,0,0.5),
+                    3px 3px 0 rgba(0,0,0,0.35),
+                    6px 6px 20px rgba(0,0,0,0.5);
             }
             50% { 
-                transform: translateY(-20px) scale(1.02);
+                transform: translateY(-12px) scale(1.02);
                 text-shadow: 
-                    0 0 15px rgba(255,255,255,0.7),
-                    0 0 30px rgba(255,215,0,0.7),
-                    4px 4px 0px rgba(0,0,0,0.3),
-                    8px 8px 25px rgba(0,0,0,0.6);
+                    0 0 18px rgba(255,255,255,0.8),
+                    0 0 36px rgba(255,215,0,0.7),
+                    3px 3px 0 rgba(0,0,0,0.35),
+                    6px 6px 28px rgba(0,0,0,0.6);
             }
         }
 
-        #title-screen .subtitle {
-            font-size: clamp(16px, 3.5vw, 24px);
-            margin: 20px 0;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        .poster-subtitle {
+            font-size: clamp(16px, 3.2vw, 24px);
+            margin: 0 0 40px 0;
+            padding: 0 20px;
+            text-align: center;
+            line-height: 2.2;
+            max-width: 380px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.5);
             position: relative;
             z-index: 1;
-            line-height: 1.8;
-            animation: fadeInUp 1s ease-out 0.5s both;
+            animation: fadeInUp 1s ease-out 0.3s both;
+        }
+
+        .poster-subtitle .subtitle-line {
+            display: block;
+        }
+
+        .poster-subtitle .subtitle-line + .subtitle-line {
+            margin-top: 8px;
+        }
+
+        .poster-subtitle .subtitle-line.highlight {
+            margin-top: 14px;
+            font-size: 1.1em;
+            font-weight: 700;
+            color: #FFD700;
+            text-shadow: 0 0 12px rgba(255,215,0,0.5), 0 2px 6px rgba(0,0,0,0.5);
+        }
+
+        .poster-subtitle .mobile-controls-text {
+            display: none !important;
+        }
+
+        @media (max-width: 768px) {
+            .poster-subtitle .desktop-controls { display: none !important; }
+            .poster-subtitle .mobile-controls-text { display: block !important; }
         }
 
         @keyframes fadeInUp {
@@ -455,18 +530,26 @@
     </style>
 </head>
 <body>
-    <!-- Title Screen -->
+    <!-- Title Screen - Game Poster -->
     <div id="title-screen">
         <div class="floating-stars" id="floating-stars"></div>
-        <h1>🌟 OUR FAMILY JOURNEY 🌟</h1>
-        <p class="subtitle">
-            Jump and collect ⭐ photo stars!<br>
-            <span class="desktop-controls">SPACE/↑ to jump • ← → arrows to move</span>
-            <span class="mobile-controls-text">Use touch buttons to move and jump</span><br>
-            Collect all 11 memories!
-        </p>
-        <button class="start-btn" onclick="startGame()">🎮 START ADVENTURE</button>
-
+        <div class="poster-content">
+            <p class="poster-tagline">
+                <span class="tagline-line">Collect the stars.</span>
+                <span class="tagline-line">Relive the moments.</span>
+            </p>
+            <h1 class="poster-title">
+                <span class="title-line">🌟 OUR FAMILY</span>
+                <span class="title-line">JOURNEY 🌟</span>
+            </h1>
+            <p class="poster-subtitle">
+                <span class="subtitle-line">Jump and collect ⭐ photo stars</span>
+                <span class="subtitle-line desktop-controls">SPACE / ↑ jump &nbsp;•&nbsp; ← → move</span>
+                <span class="subtitle-line mobile-controls-text">Touch buttons to move and jump</span>
+                <span class="subtitle-line highlight">11 memories to collect</span>
+            </p>
+            <button class="start-btn" onclick="startGame()">🎮 START ADVENTURE</button>
+        </div>
         <style>
             .desktop-controls { display: inline; }
             .mobile-controls-text { display: none; }
