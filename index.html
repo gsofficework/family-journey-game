@@ -381,7 +381,52 @@
             }
         }
 
-        /* Photo Display */
+        /* Photo Loading - shown while photo downloads, no message yet */
+        #photo-loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        #photo-loading .loading-content {
+            text-align: center;
+            color: white;
+        }
+
+        #photo-loading .loading-spinner {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 20px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top-color: #FFD700;
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+        }
+
+        #photo-loading .loading-text {
+            font-size: 18px;
+            opacity: 0.9;
+            animation: loadingPulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes loadingPulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        /* Photo Display - only shown after photo has loaded */
         #photo-display {
             display: none;
             position: fixed;
@@ -393,7 +438,7 @@
             z-index: 3000;
             justify-content: center;
             align-items: center;
-            animation: fadeIn 0.3s;
+            animation: fadeIn 0.5s ease-out;
         }
 
         @keyframes fadeIn {
@@ -410,8 +455,19 @@
             text-align: center;
             box-shadow: 0 0 40px rgba(255,215,0,0.6), 0 15px 50px rgba(0,0,0,0.7);
             border: 4px solid #FFD700;
-            animation: photoZoom 0.5s;
+            animation: photoReveal 0.6s ease-out;
             position: relative;
+        }
+
+        @keyframes photoReveal {
+            0% {
+                opacity: 0;
+                transform: scale(0.92) translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
         }
 
         @keyframes photoZoom {
@@ -584,7 +640,15 @@
         </div>
     </div>
 
-    <!-- Photo Display -->
+    <!-- Photo Loading - shown only while photo is downloading (no Memory message) -->
+    <div id="photo-loading">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p class="loading-text">Loading memory...</p>
+        </div>
+    </div>
+
+    <!-- Photo Display - shown only after photo has loaded -->
     <div id="photo-display">
         <div class="photo-frame">
             <h2 id="photo-title"></h2>
@@ -962,16 +1026,21 @@
 
             showPhoto() {
                 const photoDisplay = document.getElementById('photo-display');
+                const photoLoading = document.getElementById('photo-loading');
                 const photoImg = document.getElementById('photo-img');
                 const photoTitle = document.getElementById('photo-title');
                 const photoTagline = document.getElementById('photo-tagline');
 
-                photoDisplay.style.display = 'none'; // Keep hidden until photo is loaded
+                photoDisplay.style.display = 'none';
                 photoTitle.textContent = this.data.icon + ' ' + this.data.title;
                 photoTagline.textContent = this.data.tagline;
-                photoImg.src = ''; // Clear previous photo so we don't show old image
+                photoImg.src = '';
+
+                // Show loading overlay immediately (no Memory message yet)
+                photoLoading.style.display = 'flex';
 
                 const revealPhoto = () => {
+                    photoLoading.style.display = 'none';
                     photoDisplay.style.display = 'flex';
                     photoJustOpened = true;
                     keysReleasedAfterPhoto = false;
@@ -981,10 +1050,9 @@
                 };
 
                 photoImg.onload = () => revealPhoto();
-                photoImg.onerror = () => revealPhoto(); // Show anyway if image fails to load
+                photoImg.onerror = () => revealPhoto();
                 photoImg.src = this.data.photo;
 
-                // If image is already cached, onload may not fire
                 if (photoImg.complete) {
                     revealPhoto();
                 }
@@ -1264,6 +1332,7 @@
 
         function closePhoto() {
             document.getElementById('photo-display').style.display = 'none';
+            document.getElementById('photo-loading').style.display = 'none';
             photoJustOpened = false;
             keysReleasedAfterPhoto = false;
 
