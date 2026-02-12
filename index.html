@@ -774,7 +774,8 @@
 
         const game = {
             scrollOffset: 0,
-            gravity: 0.8,
+            gravity: isMobile ? 0.65 : 0.8,           // Slightly floatier on mobile for easier star collection
+            jumpPower: isMobile ? -42 : -35,         // Stronger jump on mobile so emojis reach stars faster
             keys: { space: false, left: false, right: false }
         };
 
@@ -836,7 +837,7 @@
 
             jump() {
                 if (!this.jumping) {
-                    this.velocityY = -35;
+                    this.velocityY = game.jumpPower;
                     this.jumping = true;
                     playJumpSound();
                 }
@@ -945,15 +946,15 @@
                 const screenX = this.x - game.scrollOffset;
                 const fb = family.getBounds();
 
-                // Only collect when jumping and close to star
-                const horizontalPadding = 60;
-                const verticalRange = 80; // Must be close vertically (jumping)
+                // More forgiving hitbox on mobile so stars are easier to collect
+                const horizontalPadding = isMobile ? 85 : 60;
+                const verticalRange = isMobile ? 110 : 80;
 
                 // Check if any family member is jumping
                 const isJumping = family.members.some(m => m.jumping);
 
                 if (screenX > fb.x - horizontalPadding && screenX < fb.x + fb.w + horizontalPadding &&
-                    this.y > fb.y - verticalRange && this.y < fb.y + 40 && isJumping) {
+                    this.y > fb.y - verticalRange && this.y < fb.y + (isMobile ? 60 : 40) && isJumping) {
                     this.collect();
                     return true;
                 }
